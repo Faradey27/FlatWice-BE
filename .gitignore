@@ -60,5 +60,6 @@ typings/
 .history/
 .next/
 .DS_Store
-.dist
+dist/
+dist
 yarn-error.log
