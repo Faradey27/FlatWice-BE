@@ -1,0 +1,27 @@
+{
+  "extends": ["tslint:recommended", "tslint-config-airbnb"],
+  "rules": {
+    "no-console": ["warn", { "allow": ["warn", "error", "info"] }],
+    "variable-name": false,
+    "import-name": false,
+    "align": false,
+    "strict-boolean-expressions": false,
+    "object-literal-sort-keys": false,
+    "member-ordering": [
+      true,
+      {
+        "order": [
+          "public-static-field",
+          "private-static-field",
+          "private-instance-field",
+          "public-constructor",
+          "private-constructor",
+          "public-instance-field",
+          "public-instance-method",
+          "protected-instance-method",
+          "private-instance-method"
+        ]
+      }
+    ]
+  }
+}

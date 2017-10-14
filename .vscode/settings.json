@@ -1,0 +1,58 @@
+// Place your settings in this file to overwrite default and user settings.
+{
+  "files.exclude": {
+    "**/.git": true,
+    "**/.history": true,
+    "**/.DS_Store": true,
+    ".tmp": true,
+    ".tscache": true,
+    ".sass-cache": true,
+    "maven": true,
+    "Gemfile*": true,
+    "**/reference.ts": true,
+    "*.sublime-*": true
+  },
+  "search.exclude": {
+    "dist": true,
+    ".happypack": true,
+    ".circleci": true,
+    "coverage": true,
+    "**/dist": true,
+    "**/.*": true,
+    "target": true,
+    "node_modules": true,
+    "**/node_modules": true,
+    "**/bower_components": true
+  },
+  "files.associations": {
+    "*.vm": "html",
+    "*.ejs": "html",
+    "*.json.erb": "json"
+  },
+  "auto-run-command.rules": [{
+    "condition": "hasFile: wallaby.js",
+    "command": "wallaby.start",
+    "message": "Running wallaby"
+  }],
+  "javascript.validate.enable": false,
+  "files.trimTrailingWhitespace": true,
+  "editor.tabSize": 2,
+  "html.format.indentInnerHtml": true,
+  "html.format.extraLiners": "",
+  "files.insertFinalNewline": true,
+  "eslint.autoFixOnSave": true,
+  "tslint.autoFixOnSave": true,
+  "workbench.iconTheme": "vscode-icons",
+  "window.zoomLevel": 0,
+  "typescript.referencesCodeLens.enabled": false,
+  "tslint.ignoreDefinitionFiles": false,
+  "tslint.exclude": "**/node_modules/**/*",
+  "editor.insertSpaces": true,
+  "editor.detectIndentation": false,
+  "path-intellisense.absolutePathToWorkspace": true,
+  "editor.quickSuggestions": {
+    "other": true,
+    "comments": false,
+    "strings": true
+  }
+}
