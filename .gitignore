@@ -57,3 +57,8 @@ typings/
 # dotenv environment variables file
 .env
 
+.history/
+.next/
+.DS_Store
+.dist
+yarn-error.log
