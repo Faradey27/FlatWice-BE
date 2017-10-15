@@ -12,6 +12,9 @@ import path from 'path';
 
 import Auth from './Auth';
 import Database from './Database';
+import * as userController from './../controllers/user';
+
+import './../configs/passport';
 
 dotenv.load({ path: path.join(__dirname, '/../configs/params.env') });
 
@@ -22,7 +25,8 @@ class App {
       initDataBase().
       setMiddlewares().
       setMetaParams().
-      initAuth();
+      initAuth().
+      setupRoutes();
   }
 
   // direct link to express app
@@ -54,6 +58,12 @@ class App {
     this.app.set('port', process.env.PORT);
 
     return this;
+  }
+
+  setupRoutes() {
+    this.app.post('/login', userController.postLogin);
+    this.app.get('/logout', userController.logout);
+    this.app.post('/signup', userController.postSignup);
   }
 
   initAuth() {
