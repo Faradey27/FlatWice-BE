@@ -1,5 +1,5 @@
 import request from 'supertest';
-import App from './../../src/App';
+import App from './../../src/controllers/App';
 const app = new App();
 
 describe('List of short tests that cover key product features', () => {

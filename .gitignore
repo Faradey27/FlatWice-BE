@@ -63,3 +63,4 @@ typings/
 dist/
 dist
 yarn-error.log
+logs/

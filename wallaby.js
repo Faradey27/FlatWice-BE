@@ -1,6 +1,7 @@
 module.exports = (wallaby) => ({
   files: [
     'src/**/*.json',
+    'src/**/*.env',
     { pattern: '__test__/beforeTest.js', instrument: false },
     { pattern: 'src/**/*.spec.js', ignore: true },
     { pattern: '__test__/**/*.spec.js', ignore: true },

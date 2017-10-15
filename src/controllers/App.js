@@ -2,15 +2,27 @@ import express from 'express';
 import compression from 'compression';
 import bodyParser from 'body-parser';
 import errorHandler from 'errorhandler';
+import session from 'express-session';
 import chalk from 'chalk';
+import dotenv from 'dotenv';
+import expressValidator from 'express-validator';
+import expressStatusMonitor from 'express-status-monitor';
+import flash from 'express-flash';
+import path from 'path';
 
-const DEFAULT_PORT = 8082;
-const DEFAULT_HOST = '0.0.0.0';
+import Auth from './Auth';
+import Database from './Database';
+
+dotenv.load({ path: path.join(__dirname, '/../configs/params.env') });
 
 class App {
   constructor() {
     this.app = express();
-    this.setMiddlewares().setMetaParams();
+    this.
+      initDataBase().
+      setMiddlewares().
+      setMetaParams().
+      initAuth();
   }
 
   // direct link to express app
@@ -19,17 +31,39 @@ class App {
   }
 
   setMiddlewares() {
+    this.app.use(expressStatusMonitor());
+    this.app.use(session({
+      resave: true,
+      saveUninitialized: true,
+      secret: process.env.SESSION_SECRET,
+      store: this.db.getStore(),
+    }));
+
     this.app.use(compression());
     this.app.use(bodyParser.json());
     this.app.use(bodyParser.urlencoded({ extended: true }));
     this.app.use(errorHandler());
+    this.app.use(expressValidator());
+    this.app.use(flash());
 
     return this;
   }
 
   setMetaParams() {
-    this.app.set('host', process.env.OPENSHIFT_NODEJS_IP || DEFAULT_HOST);
-    this.app.set('port', process.env.PORT || process.env.OPENSHIFT_NODEJS_PORT || DEFAULT_PORT);
+    this.app.set('host', process.env.OPENSHIFT_NODEJS_IP);
+    this.app.set('port', process.env.PORT);
+
+    return this;
+  }
+
+  initAuth() {
+    this.auth = new Auth(this.app);
+
+    return this;
+  }
+
+  initDataBase() {
+    this.db = new Database();
 
     return this;
   }
