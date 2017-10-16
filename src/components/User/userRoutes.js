@@ -1,6 +1,6 @@
 /* eslint-disable no-underscore-dangle */
 import passport from 'passport';
-import User from './../models/User';
+import User from './UserModel';
 
 /**
  * POST /login

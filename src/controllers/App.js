@@ -10,9 +10,8 @@ import expressStatusMonitor from 'express-status-monitor';
 import flash from 'express-flash';
 import path from 'path';
 
-import Auth from './Auth';
-import Database from './Database';
-import * as userController from './../controllers/user';
+import Database from './../components/Database';
+import User from './../components/User';
 
 import './../configs/passport';
 
@@ -25,8 +24,7 @@ class App {
       initDataBase().
       setMiddlewares().
       setMetaParams().
-      initAuth().
-      setupRoutes();
+      initComponents();
   }
 
   // direct link to express app
@@ -60,20 +58,14 @@ class App {
     return this;
   }
 
-  setupRoutes() {
-    this.app.post('/login', userController.postLogin);
-    this.app.get('/logout', userController.logout);
-    this.app.post('/signup', userController.postSignup);
-  }
-
-  initAuth() {
-    this.auth = new Auth(this.app);
+  initDataBase() {
+    this.db = new Database();
 
     return this;
   }
 
-  initDataBase() {
-    this.db = new Database();
+  initComponents() {
+    this.user = new User(this.app);
 
     return this;
   }
