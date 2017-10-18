@@ -21,8 +21,7 @@
     ],
     "coverageDirectory": "coverage",
     "collectCoverageFrom": [
-      "src/**/*.js",
-      "!src/index.js"
+      "src/**/*.js"
     ],
     "collectCoverage": true,
     "coverageThreshold": {

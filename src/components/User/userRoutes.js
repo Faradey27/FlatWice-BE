@@ -94,3 +94,15 @@ export const postSignup = (req, res, next) => {
     });
   });
 };
+
+/**
+ * GET /authenticated
+ * Check auth.
+ */
+export const isAuthenticated = (req, res) => {
+  if (req.isAuthenticated()) {
+    return res.status(200).json({ status: 'OK' });
+  }
+
+  return res.status(401).json({ status: 'FAILURE' });
+};
