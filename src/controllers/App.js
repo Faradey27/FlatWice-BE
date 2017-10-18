@@ -70,7 +70,6 @@ class App {
     return this;
   }
 
-  /* istanbul ignore next */
   start() {
     this.server = this.app.listen(this.app.get('port'), () => {
       console.info('%s App is running at http://localhost:%d in %s mode', chalk.green('✓'), this.app.get('port'), this.app.get('env'));
@@ -80,7 +79,6 @@ class App {
     return this;
   }
 
-  /* istanbul ignore next */
   stop() {
     this.server.close();
 

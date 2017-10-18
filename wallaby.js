@@ -16,7 +16,6 @@ module.exports = (wallaby) => ({
 
   tests: [
     { pattern: 'node_modules/*', ignore: true, instrument: false },
-    { pattern: 'src/index.js', ignore: true, instrument: false },
     'src/**/*.spec.js*',
     '__test__/**/*.spec.js*',
     'test/**/*.spec.js*',
