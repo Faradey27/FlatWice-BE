@@ -5,7 +5,7 @@ const app = new App();
 
 describe('Authentication', () => {
   const newUser = {
-    email: `${Math.random() * 10000}@test-magic-domain.com`,
+    email: `${Math.random() * '10000'}@test-magic-domain.com`,
     password: '12345',
     confirmPassword: '12345',
   };
@@ -63,7 +63,9 @@ describe('Authentication', () => {
 
   describe('Login and logout', () => {
     it('should login successfully', async () => {
-      const response = await request(app.express).post('/api/v1/login').send({ email: newUser.email, password: newUser.password });
+      const response = await request(app.express).
+        post('/api/v1/login').
+        send({ email: newUser.email, password: newUser.password });
       const cookies = response.headers['set-cookie'];
 
       expect(response.status).toBe(200);
@@ -78,7 +80,9 @@ describe('Authentication', () => {
     });
 
     it('should logout after login successfully', async () => {
-      const response = await request(app.express).post('/api/v1/login').send({ email: newUser.email, password: newUser.password });
+      const response = await request(app.express).
+        post('/api/v1/login').
+        send({ email: newUser.email, password: newUser.password });
       const cookies = response.headers['set-cookie'];
 
       expect(response.status).toBe(200);
@@ -110,7 +114,9 @@ describe('Authentication', () => {
     });
 
     it('should show error when user not found', async () => {
-      const response = await request(app.express).post('/api/v1/login').send({ email: 'newUser1232@gmail.com', password: newUser.password });
+      const response = await request(app.express).
+        post('/api/v1/login').
+        send({ email: 'newUser1232@gmail.com', password: newUser.password });
 
       expect(response.status).toBe(400);
       expect(response.body).toEqual({ info: {
