@@ -20,20 +20,13 @@ export const postLogin = (req, res, next) => {
   return passport.authenticate('local', (err, user, info) => {
     /* istanbul ignore next */
     if (err) {
-      return next(err);
+      res.status(500).json({ message: 'internal error during authenticate' });
     }
     if (!user) {
       return res.status(400).json({ info });
     }
 
-    return req.logIn(user, (error) => {
-      /* istanbul ignore next */
-      if (error) {
-        return next(error);
-      }
-
-      return res.status(200).json({ user: { email: user.email, id: user._id } });
-    });
+    return req.logIn(user, () => res.status(200).json({ user: { email: user.email, id: user._id } }));
   })(req, res, next);
 };
 
@@ -51,7 +44,7 @@ export const logout = (req, res) => {
  * POST /signup
  * Create a new local account.
  */
-export const postSignup = (req, res, next) => {
+export const postSignup = async (req, res) => {
   req.assert('email', 'Email is not valid').isEmail();
   req.assert('password', 'Password must be at least 4 characters long').len(Number('4'));
   req.assert('confirmPassword', 'Passwords do not match').equals(req.body.password);
@@ -67,32 +60,14 @@ export const postSignup = (req, res, next) => {
     email: req.body.email,
     password: req.body.password,
   });
+  const existingUser = await User.findOne({ email: req.body.email });
 
-  return User.findOne({ email: req.body.email }, (err, existingUser) => {
-    /* istanbul ignore next */
-    if (err) {
-      return next(err);
-    }
-    if (existingUser) {
-      return res.status(400).json({ message: 'Already registered' });
-    }
+  if (existingUser) {
+    return res.status(400).json({ message: 'Already registered' });
+  }
+  await user.save();
 
-    return user.save((error) => {
-      /* istanbul ignore next */
-      if (error) {
-        return next(error);
-      }
-
-      return req.logIn(user, (iError) => {
-        /* istanbul ignore next */
-        if (iError) {
-          return next(iError);
-        }
-
-        return res.status(200).json({ user: { email: user.email, id: user._id } });
-      });
-    });
-  });
+  return req.logIn(user, () => res.status(200).json({ user: { email: user.email, id: user._id } }));
 };
 
 /**
