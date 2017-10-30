@@ -12,6 +12,7 @@ import path from 'path';
 
 import Database from './../components/Database';
 import User from './../components/User';
+import Flat from './../components/Flat';
 
 import './../configs/passport';
 
@@ -66,6 +67,7 @@ class App {
 
   initComponents() {
     this.user = new User(this.app);
+    this.flat = new Flat(this.app);
 
     return this;
   }
