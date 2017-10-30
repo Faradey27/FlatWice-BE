@@ -76,7 +76,31 @@ export const postFlats = async (req, res) => {
     videos: req.body.videos,
   });
 
-  await flat.save();
+  const savedFlat = await flat.save();
+  const result = savedFlat.toObject();
 
-  return res.status(200).json(flat);
+  return res.status(200).json(Object.assign({}, result, { id: result._id }));
+};
+
+/**
+ * PUT /flats/:id
+ * Get list of available filtered flats
+ */
+export const putFlats = async (req, res) => {
+  const flat = await Flat.findById(req.params.id).exec();
+
+  Object.assign(flat, req.body); // eslint-disable-line
+  const savedFlat = await flat.save();
+
+  return res.status(200).json(savedFlat);
+};
+
+/**
+ * DELETE /flats/:id
+ * Get list of available filtered flats
+ */
+export const deleteFlats = async (req, res) => {
+  await Flat.findByIdAndRemove(req.params.id);
+
+  return res.status(200).json({});
 };

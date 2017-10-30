@@ -59,6 +59,7 @@ describe('Flats', () => {
   beforeEach((done) => {
     mongoose.connection.collections.flats.drop(() => done());
   });
+
   describe('Flats list', () => {
     it('should response with list of flats', async () => {
       const response = await request(app.express).get('/api/v1/flats');
@@ -80,6 +81,46 @@ describe('Flats', () => {
       expect(flatsResponse.status).toBe(200);
       expect(flatsResponse.body.flats[0].title).toBe(flat.title);
       expect(flatsResponse.body.total).toBe(1);
+    });
+  });
+
+  describe('Update flat', () => {
+    it('should response with updated flat', async () => {
+      const response = await request(app.express).post('/api/v1/flats').send(flat);
+
+      expect(response.status).toBe(200);
+      expect(response.body.title).toEqual(flat.title);
+
+      const updatedResponse = await request(app.express).put(`/api/v1/flats/${response.body.id}`).send({ title: '123' });
+
+      expect(updatedResponse.status).toBe(200);
+      expect(updatedResponse.body.title).toEqual('123');
+      expect(updatedResponse.body.shortDescription).toEqual(flat.shortDescription);
+
+      const flatsResponse = await request(app.express).get('/api/v1/flats');
+
+      expect(flatsResponse.status).toBe(200);
+      expect(flatsResponse.body.flats[0].title).toBe('123');
+      expect(flatsResponse.body.total).toBe(1);
+    });
+  });
+
+  describe('Delete flat', () => {
+    it('should response with updated flat', async () => {
+      const response = await request(app.express).post('/api/v1/flats').send(flat);
+
+      expect(response.status).toBe(200);
+      expect(response.body.title).toEqual(flat.title);
+
+      const deletedResponse = await request(app.express).delete(`/api/v1/flats/${response.body.id}`);
+
+      expect(deletedResponse.status).toBe(200);
+      expect(deletedResponse.body).toEqual({});
+
+      const flatsResponse = await request(app.express).get('/api/v1/flats');
+
+      expect(flatsResponse.status).toBe(200);
+      expect(flatsResponse.body.total).toBe(0);
     });
   });
 });
