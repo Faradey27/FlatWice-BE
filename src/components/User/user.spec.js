@@ -1,4 +1,5 @@
 import request from 'supertest';
+import mongoose from 'mongoose';
 import App from './../../../src/controllers/App';
 
 const app = new App();
@@ -10,9 +11,13 @@ describe('Authentication', () => {
     confirmPassword: '12345',
   };
 
+  beforeEach((done) => {
+    mongoose.connection.collections.users.drop(() => done());
+  });
+
   describe('SignUp', () => {
     it('should response with created user after signup', async () => {
-      const response = await request(app.express).post('/api/v1/signup').send(newUser);
+      const response = await mongoose(app.express).post('/api/v1/signup').send(newUser);
       const cookies = response.headers['set-cookie'];
 
       expect(response.status).toBe(200);

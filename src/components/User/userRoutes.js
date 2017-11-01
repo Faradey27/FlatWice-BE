@@ -59,6 +59,7 @@ export const postSignup = async (req, res) => {
   const user = new User({
     email: req.body.email,
     password: req.body.password,
+    role: 'user',
   });
   const existingUser = await User.findOne({ email: req.body.email });
 

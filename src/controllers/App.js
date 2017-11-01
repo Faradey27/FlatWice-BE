@@ -67,7 +67,7 @@ class App {
 
   initComponents() {
     this.user = new User(this.app);
-    this.flat = new Flat(this.app);
+    this.flat = new Flat(this.app, this.user.isAuthenticated, this.user.isAuthorized);
 
     return this;
   }

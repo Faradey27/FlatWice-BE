@@ -56,8 +56,22 @@ const flat = {
 };
 
 describe('Flats', () => {
+  const newUser = {
+    email: `${Math.random() * '10000'}@test-magic-domain.com`,
+    password: '12345',
+    confirmPassword: '12345',
+  };
+  let cookies = ''; // eslint-disable-line
+
   beforeEach((done) => {
-    mongoose.connection.collections.flats.drop(() => done());
+    mongoose.connection.collections.flats.drop(() => {
+      mongoose.connection.collections.users.drop(async () => {
+        const response = await request(app.express).post('/api/v1/signup').send(newUser);
+
+        cookies = response.headers['set-cookie']; // eslint-disable-line
+        done();
+      });
+    });
   });
 
   describe('Flats list', () => {
@@ -71,7 +85,9 @@ describe('Flats', () => {
 
   describe('Add flats', () => {
     it('should response with created flat', async () => {
-      const response = await request(app.express).post('/api/v1/flats').send(flat);
+      const response = await request(app.express).post('/api/v1/flats').
+        set('cookie', cookies).
+        send(flat);
 
       expect(response.status).toBe(200);
       expect(response.body.title).toEqual(flat.title);
@@ -86,12 +102,17 @@ describe('Flats', () => {
 
   describe('Update flat', () => {
     it('should response with updated flat', async () => {
-      const response = await request(app.express).post('/api/v1/flats').send(flat);
+      const response = await request(app.express).post('/api/v1/flats').
+        set('cookie', cookies).
+        send(flat);
 
       expect(response.status).toBe(200);
       expect(response.body.title).toEqual(flat.title);
 
-      const updatedResponse = await request(app.express).put(`/api/v1/flats/${response.body.id}`).send({ title: '123' });
+      const updatedResponse = await request(app.express).
+        put(`/api/v1/flats/${response.body.id}`).
+        set('cookie', cookies).
+        send({ title: '123' });
 
       expect(updatedResponse.status).toBe(200);
       expect(updatedResponse.body.title).toEqual('123');
@@ -107,12 +128,17 @@ describe('Flats', () => {
 
   describe('Delete flat', () => {
     it('should response with updated flat', async () => {
-      const response = await request(app.express).post('/api/v1/flats').send(flat);
+      const response = await request(app.express).
+        post('/api/v1/flats').
+        set('cookie', cookies).
+        send(flat);
 
       expect(response.status).toBe(200);
       expect(response.body.title).toEqual(flat.title);
 
-      const deletedResponse = await request(app.express).delete(`/api/v1/flats/${response.body.id}`);
+      const deletedResponse = await request(app.express).
+        delete(`/api/v1/flats/${response.body.id}`).
+        set('cookie', cookies);
 
       expect(deletedResponse.status).toBe(200);
       expect(deletedResponse.body).toEqual({});
