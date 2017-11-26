@@ -25,12 +25,28 @@ class User implements IFeature {
   private setupRouting(router: Application) {
     const prefix = User.PREFIX;
 
+    router.get(`${prefix}/authenticated`, this.isAuthenticated);
+    router.get(`${prefix}/logout`, this.logout);
     router.post(`${prefix}/login`, this.login);
 
     router.get(`${prefix}/user`, this.getUsers);
     router.post(`${prefix}/user`, this.addUser);
     router.delete(`${prefix}/user/:id`, this.deleteUser);
     router.put(`${prefix}/user/:id`, this.updateUser);
+  }
+
+  private isAuthenticated = (req: Request, res: Response) => {
+    if (req.isAuthenticated()) {
+      return res.status(200).json({ status: 'OK' });
+    }
+
+    return res.status(401).json({ status: 'FAILURE' });
+  }
+
+  private logout = (req: Request, res: Response) => {
+    req.logout();
+
+    return res.status(200).json({});
   }
 
   private login = (req: Request, res: Response, next: any) => {

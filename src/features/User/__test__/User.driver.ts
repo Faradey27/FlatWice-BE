@@ -17,7 +17,11 @@ class UserDriver {
   }
 
   public is = {
+    loggedIn: async (cookies: string = '') => {
+      const response = await this.request.get('/api/v1/authenticated').set('cookie', cookies);
 
+      return response.body.status === 'OK' && response.status === 200;
+    },
   };
 
   public given = {
@@ -31,6 +35,11 @@ class UserDriver {
   };
 
   public when = {
+    logout: async (cookies: string) => {
+      const response = await this.request.get('/api/v1/logout').set('cookie', cookies);
+
+      return response;
+    },
     loggedIn: async (user: IAuthUser) => {
       const response = await this.request.post('/api/v1/login').send(user);
 

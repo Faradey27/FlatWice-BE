@@ -135,6 +135,58 @@ describe('User', () => {
         done();
       });
     });
+
+    it('should return FAILURE with 401 status for authenticated request', async () => {
+      const isLoggedIn = await driver.is.loggedIn();
+
+      expect(isLoggedIn).toBeFalsy();
+    });
+
+    it('should return OK with 200 status for authenticated request when user authenticated', async () => {
+      const user: IAuthUser = {
+        email: 'someemail@gmail.com',
+        password: '12345',
+      };
+      const userMock: IUser = {
+        email: 'someemail@gmail.com',
+        password: '12345',
+      };
+
+      await driver.given.user(userMock);
+
+      const response: any = await driver.when.loggedIn(user);
+      const cookies = response.headers['set-cookie'];
+
+      const isLoggedIn = await driver.is.loggedIn(cookies);
+
+      expect(isLoggedIn).toBeTruthy();
+    });
+
+    it('should return OK with 200 status for authenticated request when user authenticated and then logout', async () => {
+      const user: IAuthUser = {
+        email: 'someemail@gmail.com',
+        password: '12345',
+      };
+      const userMock: IUser = {
+        email: 'someemail@gmail.com',
+        password: '12345',
+      };
+
+      await driver.given.user(userMock);
+
+      const response: any = await driver.when.loggedIn(user);
+      const cookies = response.headers['set-cookie'];
+
+      const isLoggedIn = await driver.is.loggedIn(cookies);
+
+      expect(isLoggedIn).toBeTruthy();
+
+      await driver.when.logout(cookies);
+
+      const isLoggedIn2 = await driver.is.loggedIn(cookies);
+
+      expect(isLoggedIn2).toBeFalsy();
+    });
   });
 
   describe('User', () => {
