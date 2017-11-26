@@ -1,3 +1,5 @@
+import * as passport from 'passport';
+import { IAuthUser, IUser } from './../index';
 import UserDriver from './User.driver';
 
 describe('User', () => {
@@ -11,6 +13,130 @@ describe('User', () => {
 
   afterEach(() => driver.cleanup());
 
+  describe('Login', () => {
+    it('should not login user with wrong email and response with error', async () => {
+      const user: IAuthUser = {
+        email: 'someemail',
+        password: '12345',
+      };
+      const response = await driver.when.loggedIn(user);
+
+      expect(response.status).toBe(400);
+      expect(response.body).toEqual({ errors: [
+        {
+          location: 'body',
+          msg: 'Email is not valid',
+          param: 'email',
+          value: false,
+        },
+      ]});
+    });
+
+    it('should not login user with blank password', async () => {
+      const user: IAuthUser = {
+        email: 'someemail@gmail.com',
+        password: '',
+      };
+      const response = await driver.when.loggedIn(user);
+
+      expect(response.status).toBe(400);
+      expect(response.body).toEqual({ errors: [
+        {
+          location: 'body',
+          msg: 'Password cannot be blank',
+          param: 'password',
+          value: '',
+        },
+      ]});
+    });
+
+    it('should not login user who is not registered', async () => {
+      const user: IAuthUser = {
+        email: 'someemail@gmail.com',
+        password: '12345',
+      };
+      const response = await driver.when.loggedIn(user);
+
+      expect(response.status).toBe(400);
+      expect(response.body).toEqual({ errors: [
+        {
+          msg: 'Email someemail@gmail.com not found.',
+        },
+      ]});
+    });
+
+    it('should login with correct email and password', async () => {
+      const user: IAuthUser = {
+        email: 'someemail@gmail.com',
+        password: '12345',
+      };
+
+      const userMock: IUser = {
+        email: 'someemail@gmail.com',
+        password: '12345',
+      };
+
+      await driver.given.user(userMock);
+
+      const response = await driver.when.loggedIn(user);
+
+      expect(response.status).toBe(200);
+      expect(response.body).toEqual({
+        user: {
+          email: user.email,
+          id: response.body.user.id,
+          updatedAt: response.body.user.updatedAt,
+          createdAt: response.body.user.createdAt,
+          profile: {},
+        },
+      });
+    });
+
+    it('should not login with wrong password', async () => {
+      const user: IAuthUser = {
+        email: 'someemail@gmail.com',
+        password: '12345',
+      };
+
+      const userMock: IUser = {
+        email: 'someemail@gmail.com',
+        password: '123456',
+      };
+
+      await driver.given.user(userMock);
+
+      const response = await driver.when.loggedIn(user);
+
+      expect(response.status).toBe(400);
+      expect(response.body).toEqual({
+        errors: [{ msg: 'Invalid email or password.' }],
+      });
+    });
+
+    it('should deserializeUser user', async (done) => {
+      const user: IAuthUser = {
+        email: 'someemail@gmail.com',
+        password: '12345',
+      };
+
+      const userMock: IUser = {
+        email: 'someemail@gmail.com',
+        password: '12345',
+      };
+
+      await driver.given.user(userMock);
+
+      const response = await driver.when.loggedIn(user);
+
+      const id = response.body.user.id;
+
+      (passport as any).deserializeUser(id, (err: any, desUser: any) => {
+        expect(desUser.email).toBe(userMock.email);
+        done();
+      });
+    });
+  });
+
   describe('User', () => {
     it('should return list of User', async () => {
       const usersResponse = await driver.get.users();
@@ -23,7 +149,7 @@ describe('User', () => {
     });
 
     it('should create User', async () => {
-      const createdUserResponse = await driver.when.userCreated({});
+      const createdUserResponse = await driver.when.userCreated({ email: '1234@gmail.com', password: '12345' });
       expect(createdUserResponse.status).toBe(200);
       expect(createdUserResponse.body._id).toBeTruthy();
       expect(createdUserResponse.body.updatedAt).toBeTruthy();
@@ -38,7 +164,7 @@ describe('User', () => {
     });
 
     it('should delete User', async () => {
-      const userResponse = await driver.when.userCreated({});
+      const userResponse = await driver.when.userCreated({ email: '1234@gmail.com', password: '12345' });
       const usersResponse = await driver.get.users();
       expect(usersResponse.body.total).toBe(1);
 
@@ -50,14 +176,14 @@ describe('User', () => {
       expect(usersResponse2.body.total).toBe(0);
     });
 
-    it('should updated User', async () => {
-      const userResponse = await driver.when.userCreated({});
+    it('should update User', async () => {
+      const userResponse = await driver.when.userCreated({ email: '1234@gmail.com', password: '12345' });
 
       const usersResponse = await driver.get.users();
       expect(usersResponse.body.users[0].deleted).toBeFalsy();
 
       const updatedResponse = await driver.when
-        .userUpdated(userResponse.body._id, { deleted: true });
+        .userUpdated(userResponse.body._id, { deleted: true, email: '1234@gmail.com', password: '12345' });
       expect(updatedResponse.status).toBe(200);
       expect(updatedResponse.body._id).toBe(userResponse.body._id);
       expect(updatedResponse.body.deleted).toBeTruthy();

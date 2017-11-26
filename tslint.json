@@ -4,6 +4,7 @@
     "no-console": ["warn", { "allow": ["warn", "error", "info"] }],
     "variable-name": false,
     "import-name": false,
+    "max-line-length": 128,
     "align": false,
     "strict-boolean-expressions": false,
     "object-literal-sort-keys": false,

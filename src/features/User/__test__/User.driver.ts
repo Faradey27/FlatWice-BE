@@ -1,7 +1,7 @@
 import * as supertest from 'supertest';
 import app from './../../../app';
 import DatabaseDriver from './../../Database/__test__/Mongo.driver';
-import User, { IUser } from './../index';
+import User, { IAuthUser, IUser } from './../index';
 import UserModel from './../User.model';
 
 class UserDriver {
@@ -20,7 +20,22 @@ class UserDriver {
 
   };
 
+  public given = {
+    user: async (user: IUser): Promise<any> => {
+      const newUser = new UserModel({ ...user });
+
+      const savedUser = await newUser.save();
+
+      return savedUser;
+    },
+  };
+
   public when = {
+    loggedIn: async (user: IAuthUser) => {
+      const response = await this.request.post('/api/v1/login').send(user);
+
+      return response;
+    },
     userCreated: async (user: IUser) => {
       const response = await this.request.post('/api/v1/user').send(user);
 
