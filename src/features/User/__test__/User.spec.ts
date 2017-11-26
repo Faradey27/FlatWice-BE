@@ -189,6 +189,108 @@ describe('User', () => {
     });
   });
 
+  describe('Sing up', () => {
+    it('should not register user with wrong email and response with error', async () => {
+      const user: IAuthUser = {
+        email: 'someemail',
+        password: '12345',
+        confirmPassword: '12345',
+      };
+      const response = await driver.when.signuped(user);
+
+      expect(response.status).toBe(400);
+      expect(response.body).toEqual({ errors: [
+        {
+          location: 'body',
+          msg: 'Email is not valid',
+          param: 'email',
+          value: false,
+        },
+      ]});
+    });
+
+    it('should not register user with blank password', async () => {
+      const user: IAuthUser = {
+        email: 'someemail@gmail.com',
+        password: '',
+      };
+      const response = await driver.when.signuped(user);
+
+      expect(response.status).toBe(400);
+      expect(response.body).toEqual({ errors: [
+        {
+          location: 'body',
+          msg: 'Password must be at least 4 characters long',
+          param: 'password',
+          value: '',
+        },
+      ]});
+    });
+
+    it('should not register user when confirmPassword did not match', async () => {
+      const user: IAuthUser = {
+        email: 'someemail@gmail.com',
+        password: '12345',
+        confirmPassword: '123456',
+      };
+      const response = await driver.when.signuped(user);
+
+      expect(response.status).toBe(400);
+      expect(response.body).toEqual({ errors: [
+        {
+          location: 'body',
+          msg: 'Passwords do not match',
+          param: 'confirmPassword',
+          value: '123456',
+        },
+      ]});
+    });
+
+    it('should not register user who is already registered', async () => {
+      const user: IAuthUser = {
+        email: 'someemail@gmail.com',
+        password: '12345',
+        confirmPassword: '12345',
+      };
+      await driver.when.signuped(user);
+      const response = await driver.when.signuped(user);
+
+      expect(response.status).toBe(400);
+      expect(response.body).toEqual({ errors: [
+        {
+          msg: 'Already registered',
+        },
+      ]});
+    });
+
+    it('should register user and user should be signuped', async () => {
+      const user: IAuthUser = {
+        email: 'someemail@gmail.com',
+        password: '12345',
+        confirmPassword: '12345',
+      };
+      const response: any = await driver.when.signuped(user);
+
+      expect(response.status).toBe(200);
+      expect(response.body).toEqual({user: {
+        email: 'someemail@gmail.com',
+        id: response.body.user.id,
+      }});
+
+      const cookies = response.headers['set-cookie'];
+
+      const isLoggedIn = await driver.is.loggedIn(cookies);
+
+      expect(isLoggedIn).toBeTruthy();
+
+      await driver.when.logout(cookies);
+
+      const isLoggedIn2 = await driver.is.loggedIn(cookies);
+
+      expect(isLoggedIn2).toBeFalsy();
+    });
+  });
+
   describe('User', () => {
     it('should return list of User', async () => {
       const usersResponse = await driver.get.users();

@@ -28,6 +28,7 @@ class User implements IFeature {
     router.get(`${prefix}/authenticated`, this.isAuthenticated);
     router.get(`${prefix}/logout`, this.logout);
     router.post(`${prefix}/login`, this.login);
+    router.post(`${prefix}/signup`, this.signup);
 
     router.get(`${prefix}/user`, this.getUsers);
     router.post(`${prefix}/user`, this.addUser);
@@ -41,6 +42,32 @@ class User implements IFeature {
     }
 
     return res.status(401).json({ status: 'FAILURE' });
+  }
+
+  private signup = (req: Request, res: Response, next: any) => {
+    req.assert('email', 'Email is not valid').isEmail();
+    req.assert('password', 'Password must be at least 4 characters long').len(Number('4'));
+    req.assert('confirmPassword', 'Passwords do not match').equals(req.body.password);
+    req.sanitize('email').normalizeEmail({ gmail_remove_dots: false });
+
+    const errors = req.validationErrors();
+
+    if (errors) {
+      return res.status(400).json({ errors });
+    }
+
+    const user: IUserModel = new UserModel({
+      email: req.body.email,
+      ...req.body,
+    });
+
+    return UserModel.findOne({ email: req.body.email }, (err: any, existingUser: any) => {
+      if (existingUser) {
+        return res.status(400).json({ errors: [{ msg: 'Already registered' }] });
+      }
+
+      return user.save(() => req.logIn(user, () => res.status(200).json({ user: { email: user.email, id: user._id } })));
+    });
   }
 
   private logout = (req: Request, res: Response) => {

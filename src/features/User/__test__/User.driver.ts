@@ -35,6 +35,11 @@ class UserDriver {
   };
 
   public when = {
+    signuped: async (user: IAuthUser) => {
+      const response = await this.request.post('/api/v1/signup').send(user);
+
+      return response;
+    },
     logout: async (cookies: string) => {
       const response = await this.request.get('/api/v1/logout').set('cookie', cookies);
 

@@ -4,6 +4,7 @@ import { Document, Model, model, Schema } from 'mongoose';
 export interface IAuthUser {
   email: string;
   password: string;
+  confirmPassword?: string;
 }
 
 export interface IUser {
@@ -36,7 +37,7 @@ export interface IUser {
 }
 
 export interface IUserModel extends IUser, Document {
-  comparePassword: (password: string) => any;
+  comparePassword?: (password: string) => any;
 }
 
 const userSchema: Schema = new Schema(
