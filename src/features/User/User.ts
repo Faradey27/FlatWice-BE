@@ -4,7 +4,7 @@ import * as passport from 'passport';
 import userModel from './User.model';
 
 import { IFeature } from './../../types/features.d';
-import { IUser, IUserModel } from './User.d';
+import { IUser, IUserModel, Roles } from './User.d';
 
 import './config/passport';
 
@@ -37,6 +37,10 @@ class User implements IFeature {
     router.post(`${prefix}/user`, this.addUser);
     router.delete(`${prefix}/user/:id`, this.deleteUser);
     router.put(`${prefix}/user/:id`, this.updateUser);
+  }
+
+  private isAllowed = (permissions: Roles[], user: IUser) => {
+    return Boolean(user && permissions.indexOf(user.role) === -1);
   }
 
   private isAuthenticated = (req: Request, res: Response) => {
@@ -100,13 +104,37 @@ class User implements IFeature {
     })(req, res, next);
   }
 
-  private getUsers = async (req: Request, res: Response) => res.status(200).json(await userModel.getUsers());
+  private getUsers = async (req: Request, res: Response) => {
+    const permissions: Roles[] = ['admin'];
+    if (!this.isAllowed(permissions, req.user)) {
+      return res.status(403).json({});
+    }
+    return res.status(200).json(await userModel.getUsers());
+  }
 
-  private addUser = async (req: Request, res: Response) => res.status(200).json(await userModel.addUser(req.body));
+  private addUser = async (req: Request, res: Response) => {
+    const permissions: Roles[] = ['admin'];
+    if (!this.isAllowed(permissions, req.user)) {
+      return res.status(403).json({});
+    }
+    return res.status(200).json(await userModel.addUser(req.body));
+  }
 
-  private deleteUser = async (req: Request, res: Response) => res.status(200).json(await userModel.deleteUser(req.params.id));
+  private deleteUser = async (req: Request, res: Response) => {
+    const permissions: Roles[] = ['admin'];
+    if (!this.isAllowed(permissions, req.user)) {
+      return res.status(403).json({});
+    }
+    return res.status(200).json(await userModel.deleteUser(req.params.id));
+  }
 
-  private updateUser = async (req: Request, res: Response) => res.status(200).json(await userModel.updateUser(req.params.id, req.body));
+  private updateUser = async (req: Request, res: Response) => {
+    const permissions: Roles[] = ['admin'];
+    if (!this.isAllowed(permissions, req.user)) {
+      return res.status(403).json({});
+    }
+    return res.status(200).json(await userModel.updateUser(req.params.id, req.body));
+  }
 }
 
 export default User;

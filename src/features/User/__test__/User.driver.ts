@@ -1,7 +1,8 @@
 import * as supertest from 'supertest';
 import app from './../../../app';
 import DatabaseDriver from './../../Database/__test__/Mongo.driver';
-import User, { IAuthUser, IUser } from './../index';
+import User from './../index';
+import { IAuthUser, IUser } from './../User.d';
 import userModel from './../User.model';
 
 class UserDriver {
@@ -48,26 +49,33 @@ class UserDriver {
 
       return response;
     },
-    userCreated: async (user: IUser) => {
-      const response = await this.request.post('/api/v1/user').send(user);
+    loggedAsAdmin: async () => {
+      const user: IUser = { email: '123@gmail.com', password: '12345', role: 'admin' };
+      await this.given.user(user);
+      const response = await this.request.post('/api/v1/login').send(user);
 
       return response;
     },
-    userDeleted: async (id: string) => {
-      const response = await this.request.delete(`/api/v1/user/${id}`).send();
+    userCreated: async (user: IUser, cookies: string = '') => {
+      const response = await this.request.post('/api/v1/user').send(user).set('cookie', cookies);
 
       return response;
     },
-    userUpdated: async (id: string, user: IUser) => {
-      const response = await this.request.put(`/api/v1/user/${id}`).send(user);
+    userDeleted: async (id: string, cookies: string = '') => {
+      const response = await this.request.delete(`/api/v1/user/${id}`).send().set('cookie', cookies);
+
+      return response;
+    },
+    userUpdated: async (id: string, user: IUser, cookies: string = '') => {
+      const response = await this.request.put(`/api/v1/user/${id}`).send(user).set('cookie', cookies);
 
       return response;
     },
   };
 
   public get = {
-    users: async () => {
-      const response = await this.request.get('/api/v1/user');
+    users: async (cookies: string = '') => {
+      const response = await this.request.get('/api/v1/user').set('cookie', cookies);
 
       return response;
     },

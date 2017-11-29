@@ -43,7 +43,6 @@ class UserModel {
     this.UserModel = model<IUserModel>('User', UserModel.schema);
   }
 
-
   public addUser = async (body: IUser): Promise<IUserModel> => {
     const newUser = new this.UserModel({ deleted: false, ...body, role: 'user' });
 

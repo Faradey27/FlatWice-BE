@@ -8,6 +8,7 @@ module.exports = (wallaby) => ({
     { pattern: 'src/**/*.spec.ts', ignore: true },
     { pattern: '__test__/**/*.spec.ts', ignore: true },
     'src/**/*.ts',
+    'src/**/*.d.ts',
     '__test__/**/*.ts',
   ],
 

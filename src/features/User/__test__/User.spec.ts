@@ -1,5 +1,5 @@
 import * as passport from 'passport';
-import { IAuthUser, IUser } from './../index';
+import { IAuthUser, IUser } from './../User.d';
 import UserDriver from './User.driver';
 
 describe('User', () => {
@@ -292,58 +292,92 @@ describe('User', () => {
   });
 
   describe('User', () => {
-    it('should return list of User', async () => {
+    it('should not create user if no permissions', async () => {
+      const createdUserResponse = await driver.when.userCreated({ email: '1234@gmail.com', password: '12345' });
+      expect(createdUserResponse.status).toBe(403);
+    });
+
+    it('should not return list of users if no permissions', async () => {
       const usersResponse = await driver.get.users();
+      expect(usersResponse.status).toBe(403);
+    });
+
+    it('should not delete user if no permissions', async () => {
+      const deletedResponse = await driver.when.userDeleted('123');
+      expect(deletedResponse.status).toBe(403);
+    });
+
+    it('should not update user if no permissions', async () => {
+      const updatedResponse = await driver.when.userUpdated('123', { email: '1234@gmail.com', password: '12345' });
+      expect(updatedResponse.status).toBe(403);
+    });
+
+    it('should return list of User', async () => {
+      const loginResponse: any = await driver.when.loggedAsAdmin();
+      const cookies = loginResponse.headers['set-cookie'];
+      const usersResponse = await driver.get.users(cookies);
 
       expect(usersResponse.status).toBe(200);
       expect(usersResponse.body).toEqual({
-        users: [],
-        total: 0,
+        users: [
+          {
+            ...usersResponse.body.users[0],
+          },
+        ],
+        total: 1,
       });
     });
 
     it('should create User', async () => {
-      const createdUserResponse = await driver.when.userCreated({ email: '1234@gmail.com', password: '12345' });
+      const loginResponse: any = await driver.when.loggedAsAdmin();
+      const cookies = loginResponse.headers['set-cookie'];
+      const createdUserResponse = await driver.when.userCreated({ email: '1234@gmail.com', password: '12345' }, cookies);
       expect(createdUserResponse.status).toBe(200);
       expect(createdUserResponse.body._id).toBeTruthy();
       expect(createdUserResponse.body.updatedAt).toBeTruthy();
       expect(createdUserResponse.body.createdAt).toBeTruthy();
 
-      const usersResponse = await driver.get.users();
+      const usersResponse = await driver.get.users(cookies);
 
       expect(usersResponse.status).toBe(200);
-      expect(usersResponse.body.total).toBe(1);
-      expect(usersResponse.body.users.length).toBe(1);
-      expect(usersResponse.body.users[0]._id).toBeTruthy();
+      expect(usersResponse.body.total).toBe(2);
+      expect(usersResponse.body.users.length).toBe(2);
+      expect(usersResponse.body.users[1]._id).toBeTruthy();
+      expect(usersResponse.body.users[1].email).toBe('1234@gmail.com');
     });
 
     it('should delete User', async () => {
-      const userResponse = await driver.when.userCreated({ email: '1234@gmail.com', password: '12345' });
-      const usersResponse = await driver.get.users();
-      expect(usersResponse.body.total).toBe(1);
+      const loginResponse: any = await driver.when.loggedAsAdmin();
+      const cookies = loginResponse.headers['set-cookie'];
 
-      const deletedResponse = await driver.when.userDeleted(userResponse.body._id);
+      const userResponse = await driver.when.userCreated({ email: '1234@gmail.com', password: '12345' }, cookies);
+      const usersResponse = await driver.get.users(cookies);
+      expect(usersResponse.body.total).toBe(2);
+
+      const deletedResponse = await driver.when.userDeleted(userResponse.body._id, cookies);
       expect(deletedResponse.status).toBe(200);
       expect(deletedResponse.body._id).toBe(userResponse.body._id);
 
-      const usersResponse2 = await driver.get.users();
-      expect(usersResponse2.body.total).toBe(0);
+      const usersResponse2 = await driver.get.users(cookies);
+      expect(usersResponse2.body.total).toBe(1);
     });
 
     it('should update User', async () => {
-      const userResponse = await driver.when.userCreated({ email: '1234@gmail.com', password: '12345' });
+      const loginResponse: any = await driver.when.loggedAsAdmin();
+      const cookies = loginResponse.headers['set-cookie'];
+      const userResponse = await driver.when.userCreated({ email: '1234@gmail.com', password: '12345' }, cookies);
 
-      const usersResponse = await driver.get.users();
-      expect(usersResponse.body.users[0].deleted).toBeFalsy();
+      const usersResponse = await driver.get.users(cookies);
+      expect(usersResponse.body.users[1].deleted).toBeFalsy();
 
       const updatedResponse = await driver.when
-        .userUpdated(userResponse.body._id, { deleted: true, email: '1234@gmail.com', password: '12345' });
+        .userUpdated(userResponse.body._id, { deleted: true, email: '1234@gmail.com', password: '12345' }, cookies);
       expect(updatedResponse.status).toBe(200);
       expect(updatedResponse.body._id).toBe(userResponse.body._id);
       expect(updatedResponse.body.deleted).toBeTruthy();
 
-      const usersResponse2 = await driver.get.users();
-      expect(usersResponse2.body.users[0].deleted).toBeTruthy();
+      const usersResponse2 = await driver.get.users(cookies);
+      expect(usersResponse2.body.users[1].deleted).toBeTruthy();
     });
   });
 });

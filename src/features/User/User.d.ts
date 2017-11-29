@@ -6,10 +6,7 @@ export interface IAuthUser {
   confirmPassword?: string;
 }
 
-declare enum Roles {
-  admin,
-  user,
-}
+export type Roles = 'admin' | 'user';
 
 export interface IUser {
   id?: string;
