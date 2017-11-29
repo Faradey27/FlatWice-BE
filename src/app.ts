@@ -4,7 +4,6 @@ import * as dotenv from 'dotenv';
 import * as errorHandler from 'errorhandler';
 import * as express from 'express';
 import * as flash from 'express-flash';
-import * as session from 'express-session';
 import * as expressStatusMonitor from 'express-status-monitor';
 import * as expressValidator from 'express-validator';
 import * as path from 'path';

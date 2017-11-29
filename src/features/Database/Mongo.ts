@@ -1,4 +1,3 @@
-import * as chalk from 'chalk';
 import * as connectMongo from 'connect-mongo';
 import * as express from 'express';
 import * as session from 'express-session';

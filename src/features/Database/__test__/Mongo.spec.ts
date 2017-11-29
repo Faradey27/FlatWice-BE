@@ -1,4 +1,3 @@
-import * as mongodb from 'mongodb';
 import { stub } from 'sinon';
 import MongoDriver from './Mongo.driver';
 

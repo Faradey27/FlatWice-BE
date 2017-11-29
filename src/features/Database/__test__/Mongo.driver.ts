@@ -1,5 +1,4 @@
-import * as mongodb from 'mongodb';
-import { connection, Model } from 'mongoose';
+import { connection } from 'mongoose';
 
 import app from './../../../app';
 import Database from './../index';
