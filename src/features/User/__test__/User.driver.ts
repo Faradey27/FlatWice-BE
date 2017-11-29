@@ -2,7 +2,7 @@ import * as supertest from 'supertest';
 import app from './../../../app';
 import DatabaseDriver from './../../Database/__test__/Mongo.driver';
 import User, { IAuthUser, IUser } from './../index';
-import UserModel from './../User.model';
+import userModel from './../User.model';
 
 class UserDriver {
   private request: supertest.SuperTest<supertest.Test>;
@@ -26,9 +26,7 @@ class UserDriver {
 
   public given = {
     user: async (user: IUser): Promise<any> => {
-      const newUser = new UserModel({ ...user });
-
-      const savedUser = await newUser.save();
+      const savedUser = await userModel.addUser(user);
 
       return savedUser;
     },
@@ -75,7 +73,7 @@ class UserDriver {
     },
   };
 
-  public cleanup = (): Promise<any> => UserModel.remove({}).exec();
+  public cleanup = (): Promise<any> => userModel.drop();
 }
 
 export default UserDriver;

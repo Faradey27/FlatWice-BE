@@ -1,105 +1,106 @@
 import * as bcrypt from 'bcrypt-nodejs';
-import { Document, Model, model, Schema } from 'mongoose';
+import { Model, model, Schema } from 'mongoose';
+import { IUser, IUserModel } from './User.d';
 
-export interface IAuthUser {
-  email: string;
-  password: string;
-  confirmPassword?: string;
-}
+class UserModel {
+  public static schema: Schema = new Schema(
+    {
+      deleted: Boolean,
+      email: {
+        type: String,
+        unique: true,
+      },
+      password: String,
+      passwordResetToken: String,
+      passwordResetExpires: Date,
 
-export interface IUser {
-  id?: string;
-  deleted?: boolean;
-  email: string;
-  password: string;
-  passwordResetToken?: string;
-  passwordResetExpires?: Date;
+      facebook: String,
+      twitter: String,
+      google: String,
+      github: String,
+      instagram: String,
+      linkedin: String,
+      steam: String,
+      tokens: Array,
 
-  facebook?: string;
-  twitter?: string;
-  google?: string;
-  github?: string;
-  instagram?: string;
-  linkedin?: string;
-  steam?: string;
-  tokens?: any[];
-
-  updatedAt?: string;
-  createdAt?: string;
-
-  profile?: {
-    name?: string,
-    gender?: string,
-    location?: string,
-    website?: string,
-    picture?: string,
-  };
-}
-
-export interface IUserModel extends IUser, Document {
-  comparePassword?: (password: string) => any;
-}
-
-const userSchema: Schema = new Schema(
-  {
-    deleted: Boolean,
-    email: {
-      type: String,
-      unique: true,
+      profile: {
+        name: String,
+        gender: String,
+        location: String,
+        website: String,
+        picture: String,
+      },
     },
-    password: String,
-    passwordResetToken: String,
-    passwordResetExpires: Date,
+    { timestamps: true },
+  );
 
-    facebook: String,
-    twitter: String,
-    google: String,
-    github: String,
-    instagram: String,
-    linkedin: String,
-    steam: String,
-    tokens: Array,
+  private UserModel: Model<IUserModel>;
 
-    profile: {
-      name: String,
-      gender: String,
-      location: String,
-      website: String,
-      picture: String,
-    },
-  },
-  { timestamps: true },
-);
+  constructor() {
+    this.cryptPasswordBeforeSave();
+    this.addComparePasswordsMethod();
 
-/**
- * Password hash middleware.
- * Before saving user, we need to crypt his password
- */
-userSchema.pre('save', function save(next) {
-  const SALT = 10;
-
-  if (!this.isModified('password')) {
-    return next();
+    this.UserModel = model<IUserModel>('User', UserModel.schema);
   }
 
-  bcrypt.genSalt(SALT, (err, salt) => bcrypt.hash(this.password, salt, null, (error, hash) => {
-    this.password = hash;
-    return next();
-  }));
-});
 
-/**
- * Helper method for validating user's password.
- * Because we are saving only crypted passwords, we need some methods to compare them
- */
-userSchema.methods.comparePassword = function (candidatePassword: string) {
-  return new Promise(
-    (resolve, reject) => {
-      return bcrypt.compare(candidatePassword, this.password, (err: any, isMatch: boolean) => resolve(isMatch));
-    },
-  );
-};
+  public addUser = async (body: IUser): Promise<IUserModel> => {
+    const newUser = new this.UserModel({ deleted: false, ...body, role: 'user' });
 
-const User: Model<IUserModel> = model<IUserModel>('User', userSchema);
+    const savedUser = await newUser.save();
 
-export default User;
+    return savedUser;
+  }
+
+  public deleteUser = (id: string): Promise<IUserModel> => this.UserModel.findByIdAndRemove(id).exec();
+
+  public updateUser = async (id: string, body: IUser): Promise<IUserModel> => {
+    const user: IUserModel = await this.UserModel.findById(id).exec();
+
+    Object.assign(user, body);
+
+    const savedUser = await user.save();
+
+    return savedUser;
+  }
+
+  public getUsers = async () => {
+    const users = await this.UserModel.find({}).exec();
+    const total = await this.UserModel.count({}).exec();
+
+    return {
+      users,
+      total,
+    };
+  }
+
+  public getUserByEmail = (email: string): Promise<IUserModel> => this.UserModel.findOne({ email: email.toLowerCase() }).exec();
+  public findById = (id: string, done: any) => this.UserModel.findById(id, done);
+
+  public drop = () => this.UserModel.remove({}).exec();
+
+  private cryptPasswordBeforeSave = () => {
+    UserModel.schema.pre('save', function save(next) {
+      const SALT = 10;
+
+      bcrypt.genSalt(SALT, (err, salt) => bcrypt.hash(this.password, salt, null, (error, hash) => {
+        this.password = hash;
+        return next();
+      }));
+    });
+  }
+
+  private addComparePasswordsMethod = () => {
+    UserModel.schema.methods.comparePassword = function (candidatePassword: string) {
+      return new Promise(
+        (resolve, reject) => {
+          return bcrypt.compare(candidatePassword, this.password, (err: any, isMatch: boolean) => resolve(isMatch));
+        },
+      );
+    };
+  }
+}
+
+const userModel: UserModel = new UserModel();
+
+export default userModel;

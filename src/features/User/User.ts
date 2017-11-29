@@ -1,7 +1,10 @@
 import { Application, Request, Response } from 'express';
 import * as passport from 'passport';
+
+import userModel from './User.model';
+
 import { IFeature } from './../../types/features.d';
-import UserModel, { IUser, IUserModel } from './User.model';
+import { IUser, IUserModel } from './User.d';
 
 import './config/passport';
 
@@ -44,7 +47,7 @@ class User implements IFeature {
     return res.status(401).json({ status: 'FAILURE' });
   }
 
-  private signup = (req: Request, res: Response, next: any) => {
+  private signup = async (req: Request, res: Response, next: any) => {
     req.assert('email', 'Email is not valid').isEmail();
     req.assert('password', 'Password must be at least 4 characters long').len(Number('4'));
     req.assert('confirmPassword', 'Passwords do not match').equals(req.body.password);
@@ -56,18 +59,13 @@ class User implements IFeature {
       return res.status(400).json({ errors });
     }
 
-    const user: IUserModel = new UserModel({
-      email: req.body.email,
-      ...req.body,
-    });
+    const existingUser = await userModel.getUserByEmail(req.body.email);
+    if (existingUser) {
+      return res.status(400).json({ errors: [{ msg: 'Already registered' }] });
+    }
 
-    return UserModel.findOne({ email: req.body.email }, (err: any, existingUser: any) => {
-      if (existingUser) {
-        return res.status(400).json({ errors: [{ msg: 'Already registered' }] });
-      }
-
-      return user.save(() => req.logIn(user, () => res.status(200).json({ user: { email: user.email, id: user._id } })));
-    });
+    const savedUser: IUserModel = await userModel.addUser(req.body);
+    return req.logIn(savedUser, () => res.status(200).json({ user: { email: savedUser.email, id: savedUser.id } }));
   }
 
   private logout = (req: Request, res: Response) => {
@@ -102,37 +100,13 @@ class User implements IFeature {
     })(req, res, next);
   }
 
-  private getUsers = async (req: Request, res: Response) => {
-    const users = await UserModel.find({}).exec();
+  private getUsers = async (req: Request, res: Response) => res.status(200).json(await userModel.getUsers());
 
-    return res.status(200).json({
-      users,
-      total: users.length,
-    });
-  }
+  private addUser = async (req: Request, res: Response) => res.status(200).json(await userModel.addUser(req.body));
 
-  private addUser = async (req: Request, res: Response) => {
-    const newUser = new UserModel({ deleted: false });
+  private deleteUser = async (req: Request, res: Response) => res.status(200).json(await userModel.deleteUser(req.params.id));
 
-    const savedUser = await newUser.save();
-
-    return res.status(200).json(savedUser);
-  }
-
-  private deleteUser = async (req: Request, res: Response) => {
-    const user: IUserModel = await UserModel.findByIdAndRemove(req.params.id).exec();
-
-    return res.status(200).json(user);
-  }
-
-  private updateUser = async (req: Request, res: Response) => {
-    const user: IUserModel = await UserModel.findById(req.params.id).exec();
-
-    Object.assign(user, req.body);
-
-    const savedUser = await user.save();
-    return res.status(200).json(savedUser);
-  }
+  private updateUser = async (req: Request, res: Response) => res.status(200).json(await userModel.updateUser(req.params.id, req.body));
 }
 
 export default User;
