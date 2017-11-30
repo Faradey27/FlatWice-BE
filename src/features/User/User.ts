@@ -28,7 +28,7 @@ class User implements IFeature {
   private setupRouting(router: Application) {
     const prefix = User.PREFIX;
 
-    router.get(`${prefix}/authenticated`, this.isAuthenticated);
+    router.get(`${prefix}/authenticated`, this.authenticated);
     router.get(`${prefix}/logout`, this.logout);
     router.post(`${prefix}/login`, this.login);
     router.post(`${prefix}/signup`, this.signup);
@@ -40,11 +40,13 @@ class User implements IFeature {
   }
 
   private isAllowed = (permissions: Roles[], user: IUser) => {
-    return Boolean(user && permissions.indexOf(user.role) === -1);
+    return Boolean(user && permissions.indexOf(user.role) !== -1);
   }
 
-  private isAuthenticated = (req: Request, res: Response) => {
-    if (req.isAuthenticated()) {
+  private isAuthenticated = (req: Request) => req.isAuthenticated();
+
+  private authenticated = (req: Request, res: Response) => {
+    if (this.isAuthenticated(req)) {
       return res.status(200).json({ status: 'OK' });
     }
 
@@ -106,6 +108,9 @@ class User implements IFeature {
 
   private getUsers = async (req: Request, res: Response) => {
     const permissions: Roles[] = ['admin'];
+    if (!this.isAuthenticated(req)) {
+      return res.status(401).json({});
+    }
     if (!this.isAllowed(permissions, req.user)) {
       return res.status(403).json({});
     }
@@ -114,6 +119,9 @@ class User implements IFeature {
 
   private addUser = async (req: Request, res: Response) => {
     const permissions: Roles[] = ['admin'];
+    if (!this.isAuthenticated(req)) {
+      return res.status(401).json({});
+    }
     if (!this.isAllowed(permissions, req.user)) {
       return res.status(403).json({});
     }
@@ -122,6 +130,9 @@ class User implements IFeature {
 
   private deleteUser = async (req: Request, res: Response) => {
     const permissions: Roles[] = ['admin'];
+    if (!this.isAuthenticated(req)) {
+      return res.status(401).json({});
+    }
     if (!this.isAllowed(permissions, req.user)) {
       return res.status(403).json({});
     }
@@ -130,6 +141,9 @@ class User implements IFeature {
 
   private updateUser = async (req: Request, res: Response) => {
     const permissions: Roles[] = ['admin'];
+    if (!this.isAuthenticated(req)) {
+      return res.status(401).json({});
+    }
     if (!this.isAllowed(permissions, req.user)) {
       return res.status(403).json({});
     }

@@ -56,6 +56,13 @@ class UserDriver {
 
       return response;
     },
+    loggedAsUser: async () => {
+      const user: IUser = { email: '123@gmail.com', password: '12345', role: 'user' };
+      await this.given.user(user);
+      const response = await this.request.post('/api/v1/login').send(user);
+
+      return response;
+    },
     userCreated: async (user: IUser, cookies: string = '') => {
       const response = await this.request.post('/api/v1/user').send(user).set('cookie', cookies);
 

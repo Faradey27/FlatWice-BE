@@ -14,6 +14,8 @@ class UserModel {
       passwordResetToken: String,
       passwordResetExpires: Date,
 
+      role: String,
+
       facebook: String,
       twitter: String,
       google: String,
@@ -44,7 +46,7 @@ class UserModel {
   }
 
   public addUser = async (body: IUser): Promise<IUserModel> => {
-    const newUser = new this.UserModel({ deleted: false, ...body, role: 'user' });
+    const newUser = new this.UserModel({ deleted: false, role: 'user', ...body });
 
     const savedUser = await newUser.save();
 

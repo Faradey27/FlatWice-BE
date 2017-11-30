@@ -292,23 +292,51 @@ describe('User', () => {
   });
 
   describe('User', () => {
-    it('should not create user if no permissions', async () => {
+    it('should not create user if not authenticated', async () => {
       const createdUserResponse = await driver.when.userCreated({ email: '1234@gmail.com', password: '12345' });
+      expect(createdUserResponse.status).toBe(401);
+    });
+
+    it('should not return list of users if not authenticated', async () => {
+      const usersResponse = await driver.get.users();
+      expect(usersResponse.status).toBe(401);
+    });
+
+    it('should not delete user if not authenticated', async () => {
+      const deletedResponse = await driver.when.userDeleted('123');
+      expect(deletedResponse.status).toBe(401);
+    });
+
+    it('should not update user if not authenticated', async () => {
+      const updatedResponse = await driver.when.userUpdated('123', { email: '1234@gmail.com', password: '12345' });
+      expect(updatedResponse.status).toBe(401);
+    });
+
+    it('should not create user if no permissions', async () => {
+      const loginResponse: any = await driver.when.loggedAsUser();
+      const cookies = loginResponse.headers['set-cookie'];
+      const createdUserResponse = await driver.when.userCreated({ email: '1234@gmail.com', password: '12345' }, cookies);
       expect(createdUserResponse.status).toBe(403);
     });
 
     it('should not return list of users if no permissions', async () => {
-      const usersResponse = await driver.get.users();
+      const loginResponse: any = await driver.when.loggedAsUser();
+      const cookies = loginResponse.headers['set-cookie'];
+      const usersResponse = await driver.get.users(cookies);
       expect(usersResponse.status).toBe(403);
     });
 
     it('should not delete user if no permissions', async () => {
-      const deletedResponse = await driver.when.userDeleted('123');
+      const loginResponse: any = await driver.when.loggedAsUser();
+      const cookies = loginResponse.headers['set-cookie'];
+      const deletedResponse = await driver.when.userDeleted('123', cookies);
       expect(deletedResponse.status).toBe(403);
     });
 
     it('should not update user if no permissions', async () => {
-      const updatedResponse = await driver.when.userUpdated('123', { email: '1234@gmail.com', password: '12345' });
+      const loginResponse: any = await driver.when.loggedAsUser();
+      const cookies = loginResponse.headers['set-cookie'];
+      const updatedResponse = await driver.when.userUpdated('123', { email: '1234@gmail.com', password: '12345' }, cookies);
       expect(updatedResponse.status).toBe(403);
     });
 
