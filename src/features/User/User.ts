@@ -55,7 +55,7 @@ class User implements IFeature {
 
   private signup = async (req: Request, res: Response, next: any) => {
     req.assert('email', 'Email is not valid').isEmail();
-    req.assert('password', 'Password must be at least 4 characters long').len(Number('4'));
+    req.assert('password', 'Password must be at least 4 characters long').len({ min: 4 });
     req.assert('confirmPassword', 'Passwords do not match').equals(req.body.password);
     req.sanitize('email').normalizeEmail({ gmail_remove_dots: false });
 
