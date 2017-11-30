@@ -5,11 +5,13 @@
   "scripts": {
     "dev": "npm run build && node ./node-runner/bin/watch",
     "start": "cross-env NODE_ENV=production npm run build && cross-env NODE_ENV=production PORT=8081 node dist/index.js",
+    "start:forever": "cross-env NODE_ENV=production npm run build && cross-env NODE_ENV=production PORT=8081 forever start dist/index.js",
     "test": "jest --forceExit",
     "build": "node ./node-runner/bin/build",
     "lint": "tslint -c tslint.json -p tsconfig.json",
     "debug": "node ./node-runner/bin/debug",
-    "feature:add": "node ./node-runner/bin/generateFeature"
+    "feature:add": "node ./node-runner/bin/generateFeature",
+    "deploy": "sh ./node-runner/bin/deploy.sh"
   },
   "jest": {
     "globals": {
@@ -64,6 +66,7 @@
     "express-session": "1.15.6",
     "express-status-monitor": "^1.0.1",
     "express-validator": "4.3.0",
+    "forever": "^0.15.3",
     "lusca": "^1.5.2",
     "mongoose": "4.13.0",
     "nodemailer": "4.3.1",
