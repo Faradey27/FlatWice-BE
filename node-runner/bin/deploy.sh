@@ -1,1 +1,1 @@
-ssh -i "~/.aws/flatwice-site.pem" ubuntu@ec2-35-156-249-68.eu-central-1.compute.amazonaws.com "cd production && cd FlatWice-BE && git pull origin master && sudo npm install && sudo killall node && sudo npm run start:forever"
+ssh -i "~/.aws/flatwice-site.pem" ubuntu@ec2-35-156-249-68.eu-central-1.compute.amazonaws.com "cd production && cd FlatWice-BE && git pull origin master && sudo npm install && sudo killall node || sudo npm run start:forever"
